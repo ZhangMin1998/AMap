@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>HELLO，AMAP!</title>
+    <style>
+        html, body {
+          margin: 0;
+          padding: 0;
+        }
+        #container {
+          margin: 0 auto;
+          width: 1000px;
+          height: 800px;
+        }
+        .layer_button{
+          margin: 30px auto;
+          width: 130px;
+          height: 24px;
+          text-align: center;
+          border: 1px solid #000;
+          cursor: pointer;
+        }
+    </style>
+    <script src="https://webapi.amap.com/maps?v=2.0&key=0a6d740d34efbd1a46c2d7cb6f1721b8"></script>
+    <script src="https://a.amap.com/jsapi_demos/static/geojson/shanghai.js"></script>
+    <!-- <script src="https://a.amap.com/jsapi_demos/static/demo-center/js/demoutils.js"></script> -->
+</head>
+<body>
+  <div id="container"></div>
+  <div class="layer_button">显示/隐藏图层</div>
+  <script>
+    const map = new AMap.Map('container', {
+      // mapStyle: 'amap://styles/whitesmoke', //设置地图的显示样式
+      viewMode: '2D',  // 默认使用 2D 模式
+      zoom:8,  //初始化地图层级
+      center: [121.045332, 31.19884],  //初始化地图中心 上海
+    })
+    // 交通路况图层
+    const traffic = new AMap.TileLayer.Traffic({
+      zIndex: 11,
+      'autoRefresh': true,     //是否自动刷新，默认为false
+      'interval': 180,         //刷新间隔，默认180s
+    })
+    map.add(traffic); //通过add方法添加图层
+    traffic.show(); //显示路况图层
+    let isShowTraffic = true
+    const layerButton = document.getElementsByClassName('layer_button')[0]
+    layerButton.addEventListener('click', function(e) {
+      if (isShowTraffic) {
+        traffic.hide()
+      } else {
+        traffic.show()
+      }
+      isShowTraffic = !isShowTraffic
+    })
+
+    // 添加点
+    const position = new AMap.Pixel(539 , 398)  // 构造成 AMap.Pixel 对象
+    // const position = new AMap.LngLat(114.0645 , 22.54846); // Marker经纬度
+    const marker = new AMap.Marker({
+      position: map.containerToLngLat(position), // 容器坐标转经纬度坐标
+      offset: new AMap.Pixel(0, 0)
+    })
+    map.add(marker)
+
+    // 添加多边形
+    const addPolygon = (data) => {
+      const polygon = new AMap.Polygon({
+        path: data,
+        fillColor: '#ccebc5', // 多边形填充颜色
+        strokeOpacity: 1, // 线条透明度
+        fillOpacity: 0.5, //填充透明度
+        strokeColor: '#2b8cbe', // 线条颜色
+        strokeWeight: 1, //线条宽度
+        strokeStyle: 'dashed', // 线样式
+        strokeDasharray: [5, 5], //轮廓的虚线和间隙的样式
+      })
+      polygon.on('mouseover', () => { // 鼠标移入更改样式
+        polygon.setOptions({
+          fillOpacity: 0.7,
+          fillColor: '#7bccc4'
+        })
+      })
+      polygon.on('mouseout', () => { // 鼠标移出恢复样式
+        polygon.setOptions({
+          fillOpacity: 0.5,
+          fillColor: '#ccebc5'
+
+        })
+      })
+      map.add(polygon)
+    }
+    addPolygon(shanghai)
+    addPolygon(suzhou)
+    addPolygon(wuxi)
+  </script>
+</body>
+</html>

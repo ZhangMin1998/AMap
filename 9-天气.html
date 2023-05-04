@@ -1,0 +1,154 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>HELLO，AMAP!</title>
+    <style>
+        html, body {
+          margin: 0;
+          padding: 0;
+        }
+        #container {
+          margin: 0 auto;
+          width: 1000px;
+          height: 800px;
+        }
+        .layer_button{
+          margin: 10px auto;
+          width: 130px;
+          height: 24px;
+          text-align: center;
+          border: 1px solid #000;
+          cursor: pointer;
+        }
+        .weather{
+          width:5rem;
+          display:inline-block;
+          padding-left:0.5rem;
+        }
+        .sharp{
+          height: 1rem;
+          width: 1rem;
+          background-color: white;
+          transform: rotateZ(45deg);
+          box-shadow: 2px 2px 3px rgba(114, 124, 245, .5);
+          position: inherit;
+          margin-left: 10.5rem;
+          margin-top: -6px;
+        }
+    </style>
+    <script src="https://webapi.amap.com/maps?v=2.0&key=0a6d740d34efbd1a46c2d7cb6f1721b8"></script>
+</head>
+<body>
+  <div id="container"></div>
+  <div class="layer_button">显示/隐藏图层</div>
+  <script>
+    // 创建地图
+    let lnglat = new AMap.LngLat(114.0645 , 22.54846)
+    const map = new AMap.Map('container', {
+      // mapStyle: 'amap://styles/whitesmoke', //设置地图的显示样式
+      viewMode: '2D',  // 默认使用 2D 模式
+      zoom:14,  //初始化地图层级
+      center: lnglat,  //初始化地图中心
+    })
+    // 交通路况图层
+    const traffic = new AMap.TileLayer.Traffic({
+      'autoRefresh': true,     //是否自动刷新，默认为false
+      'interval': 180,         //刷新间隔，默认180s
+    })
+    map.add(traffic)//通过add方法添加图层
+    traffic.show() //显示路况图层
+    let isShowTraffic = true
+    const layerButton = document.getElementsByClassName('layer_button')[0]
+    layerButton.addEventListener('click', function(e) {
+      if (isShowTraffic) {
+        traffic.hide()
+      } else {
+        traffic.show()
+      }
+      isShowTraffic = !isShowTraffic
+    })
+
+    // 添加点
+    const position = new AMap.Pixel(539 , 498)  // 构造成 AMap.Pixel 对象
+    // const position = new AMap.LngLat(114.0645 , 22.54846) // Marker经纬度
+    const marker = new AMap.Marker({
+      position: map.containerToLngLat(position), // 容器坐标转经纬度坐标
+      offset: new AMap.Pixel(0, 0)
+    })
+    map.add(marker)
+
+    AMap.plugin('AMap.Weather', function() {
+      var weather = new AMap.Weather()
+      //查询实时天气信息, 查询的城市到行政级别的城市，如朝阳区、杭州市
+      weather.getLive('福田区', function(err, data) {
+        console.log(err, data)
+        if (!err) {
+          console.log(err, data)
+          var str = [];
+          str.push('<h4 >实时天气' + '</h4><hr>');
+          str.push('<p>城市/区：' + data.city + '</p>');
+          str.push('<p>天气：' + data.weather + '</p>');
+          str.push('<p>温度：' + data.temperature + '℃</p>');
+          str.push('<p>风向：' + data.windDirection + '</p>');
+          str.push('<p>风力：' + data.windPower + ' 级</p>');
+          str.push('<p>空气湿度：' + data.humidity + '</p>');
+          str.push('<p>发布时间：' + data.reportTime + '</p>');
+          var marker = new AMap.Marker({map: map, position: map.getCenter()});
+          var infoWin = new AMap.InfoWindow({
+              content: '<div class="info" style="position:inherit;margin-bottom:0;">'+str.join('')+'</div><div class="sharp"></div>',
+              isCustom:true,
+              offset: new AMap.Pixel(0, -37)
+          });
+          infoWin.open(map, marker.getPosition());
+          marker.on('mouseover', function() {
+              infoWin.open(map, marker.getPosition());
+          });
+        }
+      });
+      //未来4天天气预报
+      // weather.getForecast('朝阳区', function(err, data) {
+      //     if (err) {return;}
+      //     var str = [];
+      //     for (var i = 0,dayWeather; i < data.forecasts.length; i++) {
+      //         dayWeather = data.forecasts[i];
+      //         str.push(dayWeather.date+' <span class="weather">'+dayWeather.dayWeather+'</span> '+ dayWeather.nightTemp + '~' + dayWeather.dayTemp + '℃');
+      //     }
+      //     document.getElementById('forecast').innerHTML = str.join('<br>');
+      // });
+    })
+
+    // var infoWindowContent =
+    // '<div class="custom-infowindow">' +
+    //     '<label style="color:grey">天安门东侧</label>' +
+    //     '<div class="input-item">' +
+    //         '<div class="input-item-prepend">' +
+    //             '<span class="input-item-text" >经纬度</span>' +
+    //         '</div>' +
+    //         '<input id="lnglat" type="text" />' +
+    //     '</div>' +
+    //     // 为 infowindow 添加自定义事件
+    //     '<input id="lnglat2container" type="button" class="btn" value="获取该位置经纬度" onclick="getLngLat()"/>' +
+    // '</div>'
+    //  // 创建一个自定义内容的 infowindow 实例
+    //  var infoWindow = new AMap.InfoWindow({
+    //     position: map.containerToLngLat(position),
+    //     offset: new AMap.Pixel(0, -30),
+    //     content: infoWindowContent
+    // })
+    // // infoWindow.open(map) // 默认打开窗体
+
+    //  // 将当前经纬度展示在 infowindow 的 input 中
+    //  const getLngLat = () => {
+    //   var lnglatInput = document.getElementById('lnglat')
+    //   lnglatInput.setAttribute('value', map.containerToLngLat(position))
+    // }
+
+    // marker.on('click', () => {
+    //   infoWindow.open(map)
+    // })
+  </script>
+</body>
+</html>

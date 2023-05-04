@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>HELLO，AMAP!</title>
+    <style>
+        html, body {
+          margin: 0;
+          padding: 0;
+        }
+        #container {
+          margin: 0 auto;
+          width: 1000px;
+          height: 800px;
+        }
+        .layer_button{
+          margin: 30px auto;
+          width: 130px;
+          height: 24px;
+          text-align: center;
+          border: 1px solid #000;
+          cursor: pointer;
+        }
+    </style>
+    <script src="https://webapi.amap.com/maps?v=2.0&key=0a6d740d34efbd1a46c2d7cb6f1721b8"></script>
+</head>
+<body>
+  <div id="container"></div>
+  <div class="layer_button">显示/隐藏图层</div>
+  <script>
+    const map = new AMap.Map('container', {
+      // mapStyle: 'amap://styles/whitesmoke', //设置地图的显示样式
+      viewMode: '2D',  // 默认使用 2D 模式
+      zoom:14,  //初始化地图层级
+      center: [114.0645 , 22.54846],  //初始化地图中心
+      layers: [ // 使用多个图层
+        new AMap.TileLayer.Satellite(), // 卫星图层
+        // new AMap.TileLayer.RoadNet(), // 路网图层
+        // new AMap.TileLayer.Traffic()
+      ]
+    })
+
+    let toolbar, scale, controlBar, hawkEye  // 缩放按钮  比例尺  罗盘   鹰眼  
+    AMap.plugin(['AMap.ToolBar','AMap.Scale', 'AMap.ControlBar', 'AMap.HawkEye'],function(){  // 异步加载插件
+      toolbar = new AMap.ToolBar() // 缩放工具条实例化
+      scale = new AMap.Scale() // 比例尺工具
+      controlBar = new AMap.ControlBar() // 方向盘
+      hawkEye = new AMap.HawkEye({
+        position: {
+          top: '0px',
+          right: '0px'
+        }
+      }) // 鹰眼
+      map.addControl(toolbar)
+      map.addControl(scale)
+      map.addControl(controlBar)
+      map.addControl(hawkEye)
+    })
+    // toolbar.show() // 缩放工具展示
+    // toolbar.hide(); // 缩放工具隐藏
+
+    scale.show() // 比例尺工具展示
+    hawkEye.show()
+  </script>
+</body>
+</html>

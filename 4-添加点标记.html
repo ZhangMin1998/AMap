@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>HELLO，AMAP!</title>
+    <style>
+        html, body {
+          margin: 0;
+          padding: 0;
+        }
+        #container {
+          margin: 0 auto;
+          width: 1000px;
+          height: 800px;
+        }
+        .layer_button{
+          margin: 30px auto;
+          width: 130px;
+          height: 24px;
+          text-align: center;
+          border: 1px solid #000;
+          cursor: pointer;
+        }
+        .custom-content-marker {
+          position: relative;
+          width: 25px;
+          height: 34px;
+        }
+
+        .custom-content-marker img {
+          width: 100%;
+          height: 100%;
+        }
+
+        .custom-content-marker .close-btn {
+          position: absolute;
+          top: -6px;
+          right: -8px;
+          width: 15px;
+          height: 15px;
+          font-size: 12px;
+          background: #ccc;
+          border-radius: 50%;
+          color: #fff;
+          text-align: center;
+          line-height: 15px;
+          box-shadow: -1px 1px 1px rgba(10, 10, 10, .2);
+        }
+
+        .custom-content-marker .close-btn:hover{
+          background: #666;
+        }
+    </style>
+    <script src="https://webapi.amap.com/maps?v=2.0&key=0a6d740d34efbd1a46c2d7cb6f1721b8"></script>
+</head>
+<body>
+  <div id="container"></div>
+  <div class="layer_button">显示/隐藏图层</div>
+  <script>
+    const map = new AMap.Map('container', {
+      // mapStyle: 'amap://styles/whitesmoke', //设置地图的显示样式
+      viewMode: '2D',  // 默认使用 2D 模式
+      zoom:14,  //初始化地图层级
+      center: [114.0645 , 22.54846],  //初始化地图中心
+      layers: [ // 使用多个图层
+        // new AMap.TileLayer.Satellite(),
+        // new AMap.TileLayer.RoadNet(),
+        // new AMap.TileLayer.Traffic()
+      ]
+    })
+
+    // 点标记显示内容，HTML要素字符串
+    const markerContent = '' +
+    '<div class="custom-content-marker">' +
+    '   <img src="//a.amap.com/jsapi_demos/static/demo-center/icons/dir-via-marker.png">' +
+    '   <div class="close-btn" onclick="clearMarker()">X</div>' +
+    '</div>';
+
+    const position = new AMap.Pixel(539 , 398)  // 构造成 AMap.Pixel 对象
+    // const position = new AMap.LngLat(114.0645 , 22.54846); // Marker经纬度
+    const marker = new AMap.Marker({
+      position: map.containerToLngLat(position), // 容器坐标转经纬度坐标
+      content: markerContent, // 将 html 传给 content
+      offset: new AMap.Pixel(-13, -30) // 以 icon 的 [center bottom] 为原点
+    })
+    map.add(marker)
+
+    // 交通路况图层
+    const traffic = new AMap.TileLayer.Traffic({
+      zIndex: 11,
+      'autoRefresh': true,     //是否自动刷新，默认为false
+      'interval': 180,         //刷新间隔，默认180s
+    })
+    map.add(traffic); //通过add方法添加图层
+    // map.remove(traffic)
+    traffic.show(); //显示路况图层
+    // traffic.hide()
+    let isShowTraffic = true
+    const layerButton = document.getElementsByClassName('layer_button')[0]
+    layerButton.addEventListener('click', function(e) {
+      if (isShowTraffic) {
+        traffic.hide()
+      } else {
+        traffic.show()
+      }
+      isShowTraffic = !isShowTraffic
+    })
+  </script>
+</body>
+</html>
